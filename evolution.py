@@ -1,6 +1,8 @@
 import copy
+import csv
 import numpy as np
-from config import ACTIVITIES, FACILITATORS, TIMES, ROOMS, POP_SIZE, rng, generate_initial_population
+from datetime import datetime
+from config import ACTIVITIES, FACILITATORS, TIMES, ROOMS, POP_SIZE, format_time, rng, generate_initial_population
 from fitness import calculate_fitness
 
 def get_probabilities(fitnesses):
@@ -39,7 +41,6 @@ def mutate(child, mutation_rate):
 # ==========================================
 
 def run_evolution():
-    POP_SIZE = 250
     population = generate_initial_population(POP_SIZE)
     mutation_rate = 0.01
     
@@ -52,6 +53,11 @@ def run_evolution():
     plateau_count = 0
     mutation_halves = 0
     
+    log_path = f"results/run_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    log_file = open(log_path, 'w', newline='')
+    log_writer = csv.writer(log_file)
+    log_writer.writerow(['Timestamp', 'Generation', 'Best', 'Average', 'Worst', 'Improvement%', 'MutationRate'])
+    
     print("Starting Evolution...")
     
     while True:
@@ -59,7 +65,7 @@ def run_evolution():
         fitnesses = [calculate_fitness(ind) for ind in population]
         best_f = max(fitnesses)
         worst_f = min(fitnesses)
-        avg_f = sum(fitnesses) / POP_SIZE
+        avg_f = sum(fitnesses) / len(population)
         
         history_best.append(best_f)
         history_avg.append(avg_f)
@@ -70,6 +76,7 @@ def run_evolution():
             imp_pct = (avg_f - prev_avg) / abs(prev_avg) if prev_avg != 0 else 0
             
         print(f"Gen {gen:3d} | Best: {best_f:6.2f} | Avg: {avg_f:6.2f} | Worst: {worst_f:6.2f} | Imp: {imp_pct*100:6.3f}% | MR: {mutation_rate:.6f}")
+        log_writer.writerow([datetime.now().isoformat(), gen, round(best_f, 4), round(avg_f, 4), round(worst_f, 4), round(imp_pct * 100, 4), round(mutation_rate, 6)])
         
         # Check termination condition -> Halve mutation rate if plateaus
         if prev_avg is not None and imp_pct < 0.01:
@@ -109,6 +116,8 @@ def run_evolution():
             
         population = next_gen
         
+    log_file.close()
+    print(f"\nLog saved to '{log_path}'")
     return population[fitnesses.index(best_f)], best_f, history_best, history_avg, history_worst
 
 # ==========================================
@@ -128,7 +137,7 @@ def print_schedule(schedule):
         
     print("\n" + "="*60)
     # Output to file
-    with open('best_schedule.txt', 'w') as f:
+    with open('results/best_schedule.txt', 'w') as f:
         f.write("FINAL OPTIMAL SCHEDULE\n")
         f.write("="*60 + "\n")
         for act in sorted_acts:
