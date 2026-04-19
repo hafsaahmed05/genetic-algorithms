@@ -53,7 +53,7 @@ def calculate_fitness(schedule):
         if load > 4:
             fitness -= 0.5
         elif load > 0 and load < 3: # 1 or 2 activities
-            if f == 'Tyler' and load < 2: # No penalty for Tyler if load == 1
+            if f == 'Tyler' and load <= 1: # No penalty for Tyler if load == 1
                 pass
             else:
                 fitness -= 0.4
