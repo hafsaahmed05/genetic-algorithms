@@ -1,9 +1,11 @@
 import sys
+import os
 import csv
-import plotext as plt
 import matplotlib.pyplot as plt
 from config import POP_SIZE, format_time
 from evolution import run_evolution
+
+os.makedirs('results', exist_ok=True)
 
 if sys.platform == 'win32':
     try:
@@ -26,7 +28,7 @@ if __name__ == '__main__':
         print(f"{act:8s} | Room: {d['room']:11s} | Time: {format_time(d['time']):6s} | Fac: {d['fac']}")
 
     # Write to file
-    with open('best_schedule.txt', 'w') as f:
+    with open('results/best_schedule.txt', 'w') as f:
         f.write("FINAL OPTIMAL SCHEDULE\n")
         f.write("=" * 60 + "\n")
         for act in sorted_acts:
@@ -44,14 +46,14 @@ if __name__ == '__main__':
     plt.legend()
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    plt.savefig("fitness_plot.png", dpi=150)
+    plt.savefig("results/fitness_plot.png", dpi=150)
     plt.show()
 
     # CSV export
-    with open('fitness_history.csv', 'w', newline='') as csvfile:
+    with open('results/fitness_history.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['Generation', 'Best', 'Average', 'Worst'])
         for i in range(len(h_best)):
             writer.writerow([i + 1, h_best[i], h_avg[i], h_worst[i]])
 
-    print("\nExported schedule to 'best_schedule.txt' and stats to 'fitness_history.csv'")
+    print("\nExported schedule to 'results/best_schedule.txt' and stats to 'results/fitness_history.csv'")
