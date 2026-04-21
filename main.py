@@ -14,6 +14,14 @@ if sys.platform == 'win32':
         pass
 
 if __name__ == '__main__':
+    if '--gui' in sys.argv:
+        from gui import SchedulerGUI
+        import tkinter as tk
+        root = tk.Tk()
+        SchedulerGUI(root)
+        root.mainloop()
+        sys.exit()
+
     best_schedule, best_fit, h_best, h_avg, h_worst = run_evolution()
 
     print(f"\nFinal Best Fitness: {best_fit}")
